@@ -1,5 +1,3 @@
-use std::mem;
-
 struct Buf<const N: usize> {
     bytes: [u8; N],
     cursor: usize,
@@ -37,27 +35,15 @@ impl Frame {
     const fn cast_slice(slice: &[Frame]) -> &[u8] {
         // SAFETY We know the slice is valid and casting to bytes should
         // always be valid, even if repr(rust) isn't stable yet.
-        unsafe { mem::transmute(slice) }
+        unsafe { std::mem::transmute(slice) }
     }
 }
 
-struct Frames(&'static [Frame]);
-
-impl Frames {
-    const fn new(slice: &'static [Frame]) -> Self {
-        Self(slice)
-    }
-
-    const fn serialize<const N: usize>(&self, buf: &mut Buf<N>) {
-        let slice: &[u8] = Frame::cast_slice(self.0);
-        buf.push_u8_slice(slice);
-    }
-}
-
-const FRAMES: Frames = Frames::new(&[Frame::First(8), Frame::Second]);
-const NB_BYTES: usize = FRAMES.0.len() * mem::size_of::<Frame>();
+const FRAMES: &[Frame] = &[Frame::First(8), Frame::Second];
+const NB_BYTES: usize = FRAMES.len() * std::mem::size_of::<Frame>();
 const SERIALIZED_FRAMES: [u8; NB_BYTES] = {
     let mut buf = Buf::<NB_BYTES>::new();
-    FRAMES.serialize(&mut buf);
+    let bytes = Frame::cast_slice(FRAMES);
+    buf.push_u8_slice(&bytes);
     buf.bytes
 };
