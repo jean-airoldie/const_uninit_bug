@@ -39,8 +39,8 @@ enum Frame {
 
 impl Frame {
     const fn cast_slice(slice: &[Frame]) -> &[u8] {
-        // SAFETY We know the slice is valid, and the src and dst are
-        // guranteed to have the same repr.
+        // SAFETY We know the slice is valid and casting to bytes should
+        // always be valid, even if repr(rust) isn't stable yet.
         unsafe { mem::transmute(slice) }
     }
 }
