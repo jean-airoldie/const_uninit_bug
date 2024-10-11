@@ -58,7 +58,7 @@ impl Frames {
     }
 
     const fn serialized_size(&self) -> usize {
-        mem::size_of::<u16>() + self.0.len() * mem::size_of::<Frame>()
+        self.0.len() * mem::size_of::<Frame>()
     }
 }
 
