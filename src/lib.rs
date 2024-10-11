@@ -13,12 +13,8 @@ impl<const N: usize> Buf<N> {
         }
     }
 
-    const fn capacity(&self) -> usize {
-        self.bytes.len() - self.cursor
-    }
-
     const fn push_u8_slice(&mut self, slice: &[u8]) {
-        if self.capacity() < slice.len() {
+        if self.bytes.len() - self.cursor < slice.len() {
             panic!("exceeded capacity");
         }
 
@@ -56,15 +52,12 @@ impl Frames {
         let slice: &[u8] = Frame::cast_slice(self.0);
         buf.push_u8_slice(slice);
     }
-
-    const fn serialized_size(&self) -> usize {
-        self.0.len() * mem::size_of::<Frame>()
-    }
 }
 
 const FRAMES: Frames = Frames::new(&[Frame::First(8), Frame::Second]);
-const SERIALIZED_FRAMES: [u8; FRAMES.serialized_size()] = {
-    let mut buf = Buf::<{ FRAMES.serialized_size() }>::new();
+const NB_BYTES: usize = FRAMES.0.len() * mem::size_of::<Frame>();
+const SERIALIZED_FRAMES: [u8; NB_BYTES] = {
+    let mut buf = Buf::<NB_BYTES>::new();
     FRAMES.serialize(&mut buf);
     buf.bytes
 };
