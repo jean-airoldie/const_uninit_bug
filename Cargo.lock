@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "const_uninit"
+name = "const_uninit_bug"
 version = "0.1.0"
